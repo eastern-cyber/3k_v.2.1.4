@@ -157,7 +157,9 @@
                 this.error = '';
                 
                 try {
-                    const apiUrl = 'http://localhost:3001/api/auth/login';
+                    // const apiUrl = 'http://localhost:3001/api/auth/login';
+                    // Change from localhost to your Vercel URL
+                    const apiUrl = 'https://3k214.dfi.fund/api/auth/login';
                     console.log('Attempting login to:', apiUrl);
                     
                     const response = await fetch(apiUrl, {
