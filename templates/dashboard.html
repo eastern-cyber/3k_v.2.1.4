@@ -115,6 +115,23 @@
             border-radius: 4px;
             margin: 10px 0;
         }
+
+        .wallet-address {
+            font-family: monospace;
+            word-break: break-all;
+        }
+
+        /* For small screens, truncate with ellipsis */
+        @media (max-width: 768px) {
+            .wallet-address {
+                display: inline-block;
+                max-width: 200px;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+                vertical-align: middle;
+            }
+        }
     </style>
 </head>
 <body>
@@ -153,7 +170,7 @@
                     <p id="nameEditMessage" style="margin: 10px 0 0 0; font-size: 14px;"></p>
                 </div>
                 
-                <p><strong>User ID:</strong> <span id="userId">Loading...</span></p>
+                <p><strong>User ID:</strong> <span id="userId" class="wallet-address">Loading...</span></p>
                 <p><strong>Status:</strong> <span style="color: green;">✅ Authenticated</span></p>
             </div>
         </div>
