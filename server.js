@@ -128,6 +128,129 @@ app.post('/api/auth/login', async (req, res) => {
     }
 });
 
+// Update profile endpoint
+app.put('/api/auth/update-profile', async (req, res) => {
+    console.log('📝 Update profile request received');
+    
+    try {
+        const { name, userId } = req.body;
+        
+        console.log('Request data:', { name, userId });
+        
+        if (!name || name.trim().length === 0) {
+            return res.status(400).json({
+                success: false,
+                message: 'Name is required'
+            });
+        }
+        
+        if (name.length > 100) {
+            return res.status(400).json({
+                success: false,
+                message: 'Name must be 100 characters or less'
+            });
+        }
+        
+        // Simple verification
+        if (!userId) {
+            return res.status(400).json({
+                success: false,
+                message: 'User ID is required'
+            });
+        }
+        
+        // Get database pool
+        const dbPool = getPool();
+        if (!dbPool) {
+            return res.status(503).json({
+                success: false,
+                message: 'Database service temporarily unavailable'
+            });
+        }
+        
+        // Update in database
+        const result = await dbPool.query(
+            `UPDATE users 
+             SET name = $1, updated_at = NOW()
+             WHERE id = $2 OR user_id = $2
+             RETURNING id, user_id, email, name, profile_picture, updated_at`,
+            [name.trim(), userId]
+        );
+        
+        if (result.rows.length === 0) {
+            console.log('User not found:', userId);
+            return res.status(404).json({
+                success: false,
+                message: 'User not found'
+            });
+        }
+        
+        console.log('✅ Name updated successfully for user:', userId);
+        
+        res.status(200).json({
+            success: true,
+            message: 'Profile updated successfully',
+            user: result.rows[0]
+        });
+        
+    } catch (error) {
+        console.error('❌ Update profile error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Server error updating profile: ' + error.message
+        });
+    }
+});
+
+// Get profile endpoint (optional but useful)
+app.get('/api/auth/profile', async (req, res) => {
+    try {
+        const { userId } = req.query;
+        
+        if (!userId) {
+            return res.status(400).json({
+                success: false,
+                message: 'User ID is required'
+            });
+        }
+        
+        const dbPool = getPool();
+        if (!dbPool) {
+            return res.status(503).json({
+                success: false,
+                message: 'Database service temporarily unavailable'
+            });
+        }
+        
+        const result = await dbPool.query(
+            `SELECT id, user_id, email, name, profile_picture, 
+                    wallet_address, nft_tier, created_at, updated_at
+             FROM users 
+             WHERE id = $1 OR user_id = $1`,
+            [userId]
+        );
+        
+        if (result.rows.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: 'User not found'
+            });
+        }
+        
+        res.json({
+            success: true,
+            user: result.rows[0]
+        });
+        
+    } catch (error) {
+        console.error('Get profile error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to fetch profile'
+        });
+    }
+});
+
 // Static files - Serve from templates directory
 app.use(express.static(path.join(__dirname, 'templates')));
 
