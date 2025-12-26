@@ -30,16 +30,12 @@ try {
     console.error('Database pool error:', error.message);
 }
 
-// Static file serving - UPDATE THESE LINES
-app.use(express.static('public')); // For public assets
+// Static file serving with directory structure preserved
+app.use('/templates', express.static(path.join(__dirname, 'templates')));
+app.use('/public', express.static(path.join(__dirname, 'public')));
 
-// Serve templates directory as root for HTML files
-app.use(express.static('templates'));
-
-// Optional: Serve specific HTML files from templates at root level
-app.get('/login.html', (req, res) => {
-    res.sendFile(path.join(__dirname, 'templates', 'login.html'));
-});
+// Optional: Also serve root files if needed
+app.use(express.static(path.join(__dirname)));
 
 app.get('/dashboard.html', (req, res) => {
     res.sendFile(path.join(__dirname, 'templates', 'dashboard.html'));
