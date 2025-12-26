@@ -163,7 +163,7 @@
             <button onclick="logout()" class="btn btn-logout">Logout</button>
             <a href="/templates/" class="btn" style="background: #1c4162;">Back to Main Page</a>
             <a href="/templates/home.html" class="btn" style="background: #4099e7;">Go to App</a>
-            <a href="/templates/login.html" class="btn" style="background: #566a7b;">Login Again</a>
+            <a href="/login.html" class="btn" style="background: #566a7b;">Login Again</a>
         </div>
         
         <div class="status-box">
@@ -436,7 +436,7 @@
             document.getElementById('userData').innerHTML = 
                 '<p style="color: orange;">No user data found. Redirecting to login...</p>';
             setTimeout(() => {
-                window.location.href = '/templates/login.html';
+                window.location.href = '/login.html';
             }, 2000);
         }
     }
