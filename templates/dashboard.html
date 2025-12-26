@@ -344,70 +344,103 @@
 
     // Update the saveName function in dashboard.html:
     // In dashboard.html, update the saveName function:
+    // Function to update user profile
     async function saveName() {
-        const newName = document.getElementById('nameInput').value;
-        const userData = JSON.parse(localStorage.getItem('user'));
-        const token = localStorage.getItem('token');
-        
-        console.log('Saving name:', newName);
-        console.log('User data:', userData);
-        console.log('Token:', token);
-        
-        if (!newName || newName.trim() === '') {
-            alert('Please enter a name');
-            return;
-        }
-        
-        if (!token) {
-            alert('Please login again');
-            window.location.href = '/login';
-            return;
-        }
-        
         try {
+            // Get input value
+            const nameInput = document.getElementById('nameInput');
+            if (!nameInput) {
+                alert('Input field not found. Please refresh the page.');
+                return;
+            }
+            
+            const newName = nameInput.value.trim();
+            const token = localStorage.getItem('token');
+            
+            // Validate
+            if (!newName) {
+                alert('Please enter a name');
+                return;
+            }
+            
+            if (!token) {
+                alert('Please login again');
+                window.location.href = '/login';
+                return;
+            }
+            
+            // Send update request
             const response = await fetch('/api/auth/update-profile', {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`  // Make sure this is correct
+                    'Authorization': `Bearer ${token}`
                 },
-                body: JSON.stringify({
-                    name: newName
-                    // DO NOT send userId - it comes from the token
-                })
+                body: JSON.stringify({ name: newName })
             });
             
-            console.log('Response status:', response.status);
-            
+            // Handle response
             if (response.status === 401) {
-                // Token expired or invalid
-                localStorage.removeItem('token');
-                localStorage.removeItem('user');
+                localStorage.clear();
                 alert('Session expired. Please login again.');
                 window.location.href = '/login';
                 return;
             }
             
             const data = await response.json();
-            console.log('Response data:', data);
             
             if (data.success) {
-                alert('Profile updated successfully!');
-                // Update local storage
-                if (userData) {
-                    userData.name = newName;
-                    localStorage.setItem('user', JSON.stringify(userData));
-                    updateUserDisplay(userData);
+                alert('✅ Profile updated successfully!');
+                
+                // Update localStorage
+                const user = JSON.parse(localStorage.getItem('user'));
+                if (user) {
+                    user.name = newName;
+                    localStorage.setItem('user', JSON.stringify(user));
+                    
+                    // Update UI
+                    const nameDisplay = document.getElementById('userNameDisplay');
+                    if (nameDisplay) {
+                        nameDisplay.textContent = newName;
+                    }
                 }
+                
+                // Clear input
+                nameInput.value = '';
             } else {
-                alert('Error: ' + (data.message || 'Failed to update profile'));
+                alert('❌ Error: ' + (data.message || 'Update failed'));
             }
             
         } catch (error) {
-            console.error('Error updating profile:', error);
+            console.error('Update error:', error);
             alert('Network error. Please try again.');
         }
     }
+
+    // Load user data on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        const token = localStorage.getItem('token');
+        const user = JSON.parse(localStorage.getItem('user'));
+        
+        if (!token || !user) {
+            window.location.href = '/login';
+            return;
+        }
+        
+        // Display user info
+        const nameDisplay = document.getElementById('userNameDisplay');
+        if (nameDisplay && user.name) {
+            nameDisplay.textContent = user.name;
+        }
+        
+        // Test token
+        fetch('/api/auth/debug-token', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        })
+        .then(r => r.json())
+        .then(data => console.log('Token debug:', data))
+        .catch(console.error);
+    });
 
     // Update loadUserData function to handle name updates
     function loadUserData() {
