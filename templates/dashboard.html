@@ -175,6 +175,12 @@
     </div>
     
     <script>
+    
+    // Add at the beginning of your script
+    console.log('Dashboard loaded');
+    console.log('User data from localStorage:', localStorage.getItem('user_data'));
+    console.log('Token from localStorage:', localStorage.getItem('user_token'));
+
     // Detect backend environment
     function detectBackendEnvironment() {
         const userData = localStorage.getItem('user_data');
@@ -336,26 +342,23 @@
         isEditingName = false;
     }
 
+    // Update the saveName function in dashboard.html:
     async function saveName() {
         const newName = document.getElementById('newNameInput').value.trim();
         const messageElement = document.getElementById('nameEditMessage');
         const token = localStorage.getItem('user_token');
-        const userData = JSON.parse(localStorage.getItem('user_data'));
+        
+        console.log('Saving name:', newName);
         
         if (!newName) {
             messageElement.innerHTML = '<span class="message-error">Name cannot be empty</span>';
             return;
         }
         
-        if (newName.length > 100) {
-            messageElement.innerHTML = '<span class="message-error">Name must be 100 characters or less</span>';
-            return;
-        }
-        
         if (!token) {
-            messageElement.innerHTML = '<span class="message-error">Session expired. Please login again.</span>';
+            messageElement.innerHTML = '<span class="message-error">Not authenticated. Please login again.</span>';
             setTimeout(() => {
-                window.location.href = '/templates/login.html';
+                window.location.href = 'login.html';
             }, 2000);
             return;
         }
@@ -365,9 +368,17 @@
         
         try {
             // Determine backend URL
-            const backendUrl = detectBackendEnvironment();
+            const backendUrl = localStorage.getItem('backend_url') || 
+                            (window.location.hostname.includes('localhost') ? 
+                            'http://localhost:3001' : 
+                            'https://3k214.dfi.fund');
             
-            // Send update request to backend
+            console.log('Sending to backend:', { 
+                backendUrl: `${backendUrl}/api/auth/update-profile`,
+                token: token ? 'Present' : 'Missing'
+            });
+            
+            // Send update request with JWT token
             const response = await fetch(`${backendUrl}/api/auth/update-profile`, {
                 method: 'PUT',
                 headers: {
@@ -375,15 +386,18 @@
                     'Authorization': `Bearer ${token}`
                 },
                 body: JSON.stringify({
-                    name: newName,
-                    userId: userData.id || userData.user_id
+                    name: newName
                 })
             });
             
+            console.log('Response status:', response.status);
+            
             const data = await response.json();
+            console.log('Response data:', data);
             
             if (response.ok && data.success) {
                 // Update localStorage
+                const userData = JSON.parse(localStorage.getItem('user_data'));
                 userData.name = newName;
                 localStorage.setItem('user_data', JSON.stringify(userData));
                 
@@ -399,6 +413,12 @@
                 }, 2000);
             } else {
                 messageElement.innerHTML = `<span class="message-error">❌ ${data.message || 'Update failed'}</span>`;
+                // If token is invalid, redirect to login
+                if (response.status === 401 || response.status === 403) {
+                    setTimeout(() => {
+                        window.location.href = 'login.html';
+                    }, 2000);
+                }
             }
             
         } catch (error) {
