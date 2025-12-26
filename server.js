@@ -155,15 +155,21 @@ app.post('/api/auth/login', async (req, res) => {
 });
 
 // Update profile endpoint
-// Update profile endpoint
 app.put('/api/auth/update-profile', authenticateToken, async (req, res) => {
-    console.log('📝 Update profile request received for user:', req.user.id);
+    console.log('📝 Update profile request received');
+    console.log('User from token:', req.user);
     
     try {
         const { name } = req.body;
-        const userId = req.user.id; // Get from token, not from body
         
-        console.log('Request data:', { name, userId });
+        // Extract userId from token - your token has "userId" field
+        const userId = req.user.userId; // This should be 282 from your token
+        
+        console.log('Request data:', { 
+            name, 
+            userId,
+            tokenContains: req.user 
+        });
         
         if (!name || name.trim().length === 0) {
             return res.status(400).json({
@@ -172,11 +178,10 @@ app.put('/api/auth/update-profile', authenticateToken, async (req, res) => {
             });
         }
 
-        // Validate userId
         if (!userId) {
             return res.status(400).json({
                 success: false,
-                message: 'User ID is required'
+                message: 'User ID is required. Token contains: ' + JSON.stringify(req.user)
             });
         }
 
@@ -188,7 +193,7 @@ app.put('/api/auth/update-profile', authenticateToken, async (req, res) => {
             });
         }
 
-        // Update user in database
+        // Update user in database - using the numeric userId (282)
         const query = 'UPDATE users SET name = $1 WHERE id = $2 RETURNING id, name, email, created_at';
         const values = [name.trim(), userId];
         
@@ -199,7 +204,7 @@ app.put('/api/auth/update-profile', authenticateToken, async (req, res) => {
         if (result.rowCount === 0) {
             return res.status(404).json({
                 success: false,
-                message: 'User not found'
+                message: 'User not found with ID: ' + userId
             });
         }
 
