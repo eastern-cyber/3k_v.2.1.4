@@ -1,0 +1,31 @@
+<!-- test-api.html - Save in templates folder -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>API Test</title>
+</head>
+<body>
+    <h1>Test API Connection</h1>
+    <button onclick="testAPI()">Test API</button>
+    <div id="result"></div>
+    
+    <script>
+    async function testAPI() {
+        const url = 'https://3k214.dfi.fund/api/health';
+        const result = document.getElementById('result');
+        
+        try {
+            result.textContent = 'Testing...';
+            const response = await fetch(url);
+            const data = await response.json();
+            result.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+        } catch (error) {
+            result.textContent = 'Error: ' + error.message;
+        }
+    }
+    
+    // Auto-test on load
+    window.onload = testAPI;
+    </script>
+</body>
+</html>
