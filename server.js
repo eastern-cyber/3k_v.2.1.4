@@ -300,6 +300,15 @@ app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'templates/index.html'));
 });
 
+// Add this debug endpoint to server.js (temporary)
+app.get('/api/auth/debug-token', authenticateToken, (req, res) => {
+    res.json({
+        success: true,
+        user: req.user,
+        message: 'Token is valid'
+    });
+});
+
 // Export for Vercel serverless
 module.exports = app;
 
