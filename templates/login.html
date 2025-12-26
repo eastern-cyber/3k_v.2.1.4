@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>KokKokKok - Login</title>
-    <link rel="shortcut icon" type="image/x-icon" href="../static/images/favicon.ico" >
+    <link rel="shortcut icon" type="image/x-icon" href="/static/images/favicon.ico">
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
     <style type="text/tailwindcss">
@@ -32,8 +32,8 @@
     <div class="min-h-[100dvh] grid grid-rows-[auto_1fr_auto]">
         <header class="sticky top-0 z-10">
             <div class="bg-white h-[60px] flex items-center px-2.5">
-                <a href="/templates/">
-                    <img src="../static/images/3k_v.2.1.2.png">
+                <a href="/">
+                    <img src="/static/images/3k_v.2.1.2.png" alt="KokKokKok Logo">
                 </a>
             </div>
         </header>
@@ -71,7 +71,7 @@
                                             <path d="M15 25c0-.68.08-1.35.24-1.98l9.74 9.73A8.02 8.02 0 0 1 15 25Z"></path>
                                         </svg>
                                         <svg x-show="passwordVisible" x-cloak class="w-5 h-5" viewBox="0 0 48 48" >
-                                            <path d="M41.4 23.71a.9.9 0 0 1 0 .58c-.63 1.92-2.2 4.89-4.82 7.51A17.35 17.35 0 0 1 24 37.11c-5.42 0-9.55-2.28-12.58-5.3a20.44 20.44 0 0 1-4.82-7.52.9.9 0 0 1 0-.58c.63-1.92 2.2-4.89 4.82-7.51A17.35 17.35 0 0 1 24 10.89c5.42 0 9.55 2.28 12.58 5.3a20.44 20.44 0 0 1 4.82 7.52ZM24 41c13.83 0 20.82-11.7 21.96-16.81a.85.85 0 0 0 0-.38C44.82 18.71 37.83 7 24 7S3.18 18.7 2.04 23.81a.85.85 0 0 0 0 .38C3.18 29.29 10.17 41 24 41Z"></path>
+                                            <path d="M41.4 23.71a.9.9 0 0 1 0 .58c-.63 1.92-2.2 4.89-4.82 7.51A17.35 17.35 0 0 1 24 37.11c-5.42 0-9.55 2.28-12.58 5.3a20.44 20.44 0 0 1-4.82-7.52.9.9 0 0 1 0-.58c.63-1.92 2.2-4.89 4.82-7.51A17.35 17.35 0 0 1 24 10.89c5.42 0 9.55 2.28 12.58 5.3a20.44 20.44 0 0 1 4.82 7.52ZM24 41c13.83 0 20.82-11.7 21.96-16.81a.85.85 0 0 0 0-.38C44.82 18.71 37.83 7 24 7S3.18 18.7 2.04 23.81a.85.85 0 0 0 0 .38C3.18 29.29 10.17 41 24 41Z"></path>
                                             <path d="M24 27.21a3.21 3.21 0 1 1 0-6.42 3.21 3.21 0 0 1 0 6.42Zm0 4.29a7.5 7.5 0 1 0 0-15 7.5 7.5 0 0 0 0 15Z"></path>
                                         </svg>
                                     </button>
@@ -83,7 +83,7 @@
                                 <span x-text="error"></span>
                             </div>
                             
-                            <a href="/templates/forgot-password.html" class="inline-block align-top text-xs font-medium text-neutral-500 hover:underline hover:text-black mb-6">
+                            <a href="/forgot-password" class="inline-block align-top text-xs font-medium text-neutral-500 hover:underline hover:text-black mb-6">
                                 Forgot password?
                             </a>
                             
@@ -103,14 +103,14 @@
                 
                 <div class="p-0 flex justify-center font-bold">
                     <p class="p-4 rounded-sm bg-neutral-200 mb-6 hover:bg-red-500">
-                    <a href="home.html" class="font-medium hover:bg-red-500 text-neutral-600 hover:text-neutral-100 mb-6">
-                        App Prototype
-                    </a>
+                        <a href="/templates/home.html" class="font-medium hover:bg-red-500 text-neutral-600 hover:text-neutral-100">
+                            App Prototype
+                        </a>
                     </p>
                 </div>
                 
                 <div class="flex justify-center">
-                    <a href="index.html" class="flex items-center">
+                    <a href="/" class="flex items-center">
                         <div class="w-3.5 h-3.5">
                             <svg viewBox="0 0 48 48">
                                 <path d="M4.58579 22.5858L20.8787 6.29289C21.2692 5.90237 21.9024 5.90237 22.2929 6.29289L23.7071 7.70711C24.0976 8.09763 24.0976 8.7308 23.7071 9.12132L8.82843 24L23.7071 38.8787C24.0976 39.2692 24.0976 39.9024 23.7071 40.2929L22.2929 41.7071C21.9024 42.0976 21.2692 42.0976 20.8787 41.7071L4.58579 25.4142C3.80474 24.6332 3.80474 23.3668 4.58579 22.5858Z"></path>
@@ -146,6 +146,7 @@
                 console.log('Login form initialized');
             },
             
+            // REPLACED handleSubmit function:
             async handleSubmit() {
                 // Prevent empty submission
                 if (!this.email || !this.password) {
@@ -157,10 +158,11 @@
                 this.error = '';
                 
                 try {
-                    // const apiUrl = 'http://localhost:3001/api/auth/login';
-                    // Change from localhost to your Vercel URL
+                    // Always use production URL for now
                     const apiUrl = 'https://3k214.dfi.fund/api/auth/login';
+                    
                     console.log('Attempting login to:', apiUrl);
+                    console.log('Credentials:', { email: this.email });
                     
                     const response = await fetch(apiUrl, {
                         method: 'POST',
@@ -170,20 +172,24 @@
                         body: JSON.stringify({
                             email: this.email,
                             password: this.password
-                        })
+                        }),
+                        credentials: 'include' // Important for cookies if needed
                     });
                     
                     console.log('Response status:', response.status);
                     
-                    // Check if response is JSON
-                    const contentType = response.headers.get('content-type');
-                    if (!contentType || !contentType.includes('application/json')) {
-                        const text = await response.text();
-                        console.error('Non-JSON response:', text.substring(0, 200));
-                        throw new Error('Server returned: ' + text.substring(0, 100));
+                    // Get response text first to check if it's JSON
+                    const responseText = await response.text();
+                    console.log('Raw response:', responseText.substring(0, 200));
+                    
+                    let data;
+                    try {
+                        data = JSON.parse(responseText);
+                    } catch (e) {
+                        console.error('Failed to parse JSON:', e);
+                        throw new Error('Server returned invalid JSON: ' + responseText.substring(0, 100));
                     }
                     
-                    const data = await response.json();
                     console.log('Response data:', data);
                     
                     if (response.ok && data.success) {
@@ -195,25 +201,16 @@
                             localStorage.setItem('user_data', JSON.stringify(data.user));
                         }
                         
+                        // Store backend URL for future API calls
+                        localStorage.setItem('backend_url', 'https://3k214.dfi.fund');
+                        
                         // Show success message
                         this.error = '✅ Login successful!';
                         
-                        // IMPORTANT: Redirect to your ACTUAL domain, not localhost
+                        // Redirect to dashboard
                         setTimeout(() => {
-                            // Use your actual domain instead of localhost
                             window.location.href = '/templates/dashboard.html';
                         }, 1000);
-
-                        // In handleSubmit() function after successful login:
-                        // Store backend URL for future use
-                        const apiUrl = isLocalhost 
-                        ? 'http://localhost:3001/api/auth/login'
-                        : 'https://3k214.dfi.fund/api/auth/login';
-
-                        // Store backend info
-                        const backendBaseUrl = apiUrl.replace('/api/auth/login', '');
-                        localStorage.setItem('backend_url', backendBaseUrl);
-                        localStorage.setItem('backend_port', window.location.port || '3001');                        
                     } else {
                         this.error = data.message || 'Invalid email or password';
                     }
@@ -225,7 +222,8 @@
                         error.message.includes('NetworkError') ||
                         error.message.includes('CORS')) {
                         
-                        this.error = 'Connection error. Please check backend server.';
+                        this.error = 'Connection error. Please check your internet connection.';
+                        console.log('CORS/Network error. Make sure backend has proper CORS headers.');
                     } else {
                         this.error = 'Error: ' + error.message;
                     }
@@ -279,6 +277,10 @@
                 }
             });
         }
+        
+        // Debug: Check if Alpine.js is loaded
+        console.log('Alpine.js loaded:', !!window.Alpine);
+        console.log('Current URL:', window.location.href);
     });
     </script>
 </body>
