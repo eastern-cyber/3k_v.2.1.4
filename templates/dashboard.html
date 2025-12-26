@@ -137,50 +137,50 @@
 <body>
     <div class="container">
         <div class="success">
-            <h1>🎉 Login Successful!</h1>
-            <p>Welcome to KokKokKok Dashboard</p>
+            <h1>🎉 ล็อกอินสำเร็จ!</h1>
+            <p>KokKokKok Dashboard ยินดีต้อนรับ</p>
         </div>
         
         <div class="user-info">
-            <h2>User Information</h2>
+            <h2>รายละเอียดสมาชิก</h2>
             <div id="userData">
-                <p><strong>Email:</strong> <span id="userEmail">Loading...</span></p>
+                <p><strong>อีเมล:</strong> <span id="userEmail">Loading...</span></p>
                 
                 <!-- Name with Edit Button -->
                 <div class="name-section">
-                    <p style="margin: 0;"><strong>Name:</strong> <span id="userName">Loading...</span></p>
+                    <p style="margin: 0;"><strong>ชื่อ:</strong> <span id="userName">Loading...</span></p>
                     <button onclick="toggleNameEdit()" class="btn" style="padding: 4px 12px; font-size: 12px;">
-                        ✏️ Edit
+                        ✏️ แก้ไขชื่อ
                     </button>
                 </div>
                 
                 <!-- Name Edit Form (hidden by default) -->
                 <div id="nameEditForm" class="name-edit-form">
-                    <h3 style="margin-top: 0;">Edit Your Name</h3>
+                    <h3 style="margin-top: 0;">แก้ไขชื่อของท่าน</h3>
                     <div style="display: flex; gap: 10px; align-items: center;">
                         <input type="text" id="newNameInput" style="flex: 1; padding: 8px; border: 1px solid #ccc; border-radius: 4px;" 
-                            placeholder="Enter new name" maxlength="100">
+                            placeholder="ใส่ชื่อใหม่" maxlength="100">
                         <button onclick="saveName()" class="btn" style="padding: 8px 16px; background: #4CAF50;">
-                            💾 Save
+                            💾 บันทึก
                         </button>
                         <button onclick="cancelNameEdit()" class="btn" style="padding: 8px 16px; background: #757575;">
-                            ❌ Cancel
+                            ❌ ยกเลิก
                         </button>
                     </div>
                     <p id="nameEditMessage" style="margin: 10px 0 0 0; font-size: 14px;"></p>
                 </div>
                 
-                <p><strong>User ID (Wallet):</strong> <span id="userId" class="wallet-address">Loading...</span></p>
+                <p><strong>เลขกระเป๋า:</strong> <span id="userId" class="wallet-address">Loading...</span></p>
                 <p><strong>Token ID:</strong> <span id="tokenId">Loading...</span></p>
-                <p><strong>Status:</strong> <span style="color: green;">✅ Authenticated</span></p>
+                <p><strong>สถานะ:</strong> <span style="color: green;">✅ สมาชิก</span></p>
             </div>
         </div>
         
         <div>
-            <button onclick="logout()" class="btn btn-logout">Logout</button>
-            <a href="/" class="btn" style="background: #1c4162;">Back to Main Page</a>
-            <a href="/home.html" class="btn" style="background: #4099e7;">Go to App</a>
-            <a href="/login.html" class="btn" style="background: #566a7b;">Login Again</a>
+            <button onclick="logout()" class="btn btn-logout">ล็อกเอ้าท์</button>
+            <a href="/" class="btn" style="background: #1c4162;">กลับหน้าหลัก</a>
+            <a href="/home.html" class="btn" style="background: #4099e7;">เข้าสู่แอ๊พ</a>
+            <a href="/login.html" class="btn" style="background: #566a7b;">ล็อกอินอีกครั้ง</a>
         </div>
         
         <div class="status-box">
