@@ -1,0 +1,80 @@
+<!-- test-all-endpoints.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test All Endpoints</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; }
+        .test { margin: 10px 0; padding: 10px; border: 1px solid #ccc; }
+        .success { background: #d4edda; }
+        .error { background: #f8d7da; }
+        button { margin: 5px; padding: 10px; }
+    </style>
+</head>
+<body>
+    <h1>Test All Endpoints</h1>
+    
+    <div>
+        <button onclick="testEndpoint('/api/health')">Test /api/health</button>
+        <button onclick="testEndpoint('/api/auth/login')">Test /api/auth/login</button>
+        <button onclick="testEndpoint('/')">Test Home</button>
+        <button onclick="testEndpoint('/login')">Test Login Page</button>
+        <button onclick="testEndpoint('/templates/login.html')">Test Login HTML</button>
+    </div>
+    
+    <div id="results"></div>
+    
+    <script>
+    async function testEndpoint(endpoint) {
+        const url = 'https://3k214.dfi.fund' + endpoint;
+        const results = document.getElementById('results');
+        const div = document.createElement('div');
+        div.className = 'test';
+        div.innerHTML = `<strong>Testing:</strong> ${url}<br>`;
+        results.prepend(div);
+        
+        try {
+            const start = Date.now();
+            const response = await fetch(url, {
+                method: endpoint.includes('login') ? 'POST' : 'GET',
+                headers: endpoint.includes('login') ? {
+                    'Content-Type': 'application/json'
+                } : {},
+                body: endpoint.includes('login') ? JSON.stringify({
+                    email: 'test@test.com',
+                    password: 'test'
+                }) : undefined
+            });
+            const end = Date.now();
+            
+            const contentType = response.headers.get('content-type');
+            const isJson = contentType && contentType.includes('application/json');
+            
+            let data;
+            if (isJson) {
+                data = await response.json();
+            } else {
+                data = await response.text();
+                data = data.substring(0, 200) + (data.length > 200 ? '...' : '');
+            }
+            
+            div.innerHTML += `
+                <strong>Status:</strong> ${response.status} ${response.statusText}<br>
+                <strong>Time:</strong> ${end - start}ms<br>
+                <strong>Content-Type:</strong> ${contentType || 'none'}<br>
+                <strong>Response:</strong> <pre>${typeof data === 'string' ? data : JSON.stringify(data, null, 2)}</pre>
+            `;
+            
+            div.classList.add(response.ok ? 'success' : 'error');
+            
+        } catch (error) {
+            div.innerHTML += `<strong>Error:</strong> ${error.message}`;
+            div.classList.add('error');
+        }
+    }
+    
+    // Test health endpoint on load
+    window.onload = () => testEndpoint('/api/health');
+    </script>
+</body>
+</html>

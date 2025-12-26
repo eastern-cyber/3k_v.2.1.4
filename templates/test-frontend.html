@@ -1,0 +1,180 @@
+<!-- Create test-frontend.html in templates directory -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KokKokKok Frontend Test</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        h1 { color: #333; }
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .success { background: #e8f5e9; border-color: #4CAF50; }
+        .error { background: #ffebee; border-color: #f44336; }
+        .loading { background: #e3f2fd; border-color: #2196F3; }
+        button {
+            padding: 10px 20px;
+            background: #2196F3;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #1976D2; }
+        .result {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 KokKokKok Frontend Test</h1>
+        <p>Test the connection between frontend and backend</p>
+        
+        <div class="test-section">
+            <h3>1. Server Health Check</h3>
+            <button onclick="testHealth()">Test /api/health</button>
+            <div id="healthResult" class="result"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>2. Login Test</h3>
+            <div>
+                <input type="text" id="email" placeholder="Email" value="test@kokkokkok.com">
+                <input type="password" id="password" placeholder="Password" value="test123">
+                <button onclick="testLogin()">Test Login</button>
+            </div>
+            <div id="loginResult" class="result"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>3. LocalStorage Check</h3>
+            <button onclick="checkStorage()">Check LocalStorage</button>
+            <button onclick="clearStorage()">Clear Storage</button>
+            <div id="storageResult" class="result"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>4. Frontend Pages</h3>
+            <button onclick="window.open('/login', '_blank')">Open Login Page</button>
+            <button onclick="window.open('/dashboard', '_blank')">Open Dashboard</button>
+            <button onclick="window.open('/', '_blank')">Open Home</button>
+        </div>
+    </div>
+    
+    <script>
+        const API_BASE = 'http://localhost:3001/api';
+        
+        async function testHealth() {
+            const resultEl = document.getElementById('healthResult');
+            resultEl.className = 'result loading';
+            resultEl.textContent = 'Testing...';
+            
+            try {
+                const response = await fetch(`${API_BASE}/health`);
+                const data = await response.json();
+                
+                resultEl.className = 'result ' + (response.ok ? 'success' : 'error');
+                resultEl.textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                resultEl.className = 'result error';
+                resultEl.textContent = `Error: ${error.message}`;
+            }
+        }
+        
+        async function testLogin() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const resultEl = document.getElementById('loginResult');
+            
+            resultEl.className = 'result loading';
+            resultEl.textContent = 'Logging in...';
+            
+            try {
+                const response = await fetch(`${API_BASE}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    resultEl.className = 'result success';
+                    
+                    // Store in localStorage (like real login)
+                    localStorage.setItem('user_token', data.token);
+                    localStorage.setItem('user_data', JSON.stringify(data.user));
+                    localStorage.setItem('backend_url', 'http://localhost:3001');
+                    
+                    resultEl.textContent = `✅ Login successful!\n\nToken: ${data.token.substring(0, 50)}...\nUser: ${data.user.email}\nName: ${data.user.name}`;
+                } else {
+                    resultEl.className = 'result error';
+                    resultEl.textContent = `❌ Login failed: ${data.message || 'Unknown error'}`;
+                }
+            } catch (error) {
+                resultEl.className = 'result error';
+                resultEl.textContent = `Error: ${error.message}`;
+            }
+        }
+        
+        function checkStorage() {
+            const resultEl = document.getElementById('storageResult');
+            const items = {
+                'user_token': localStorage.getItem('user_token'),
+                'user_data': localStorage.getItem('user_data'),
+                'backend_url': localStorage.getItem('backend_url')
+            };
+            
+            let output = 'LocalStorage contents:\n\n';
+            for (const [key, value] of Object.entries(items)) {
+                output += `${key}: ${value ? '✓ Present' : '✗ Missing'}\n`;
+                if (value && key === 'user_data') {
+                    try {
+                        const user = JSON.parse(value);
+                        output += `  → Email: ${user.email}, Name: ${user.name}\n`;
+                    } catch (e) {}
+                }
+            }
+            
+            resultEl.className = 'result success';
+            resultEl.textContent = output;
+        }
+        
+        function clearStorage() {
+            localStorage.removeItem('user_token');
+            localStorage.removeItem('user_data');
+            localStorage.removeItem('backend_url');
+            document.getElementById('storageResult').className = 'result success';
+            document.getElementById('storageResult').textContent = '✅ LocalStorage cleared!';
+        }
+        
+        // Auto-run health check on load
+        window.onload = testHealth;
+    </script>
+</body>
+</html>
