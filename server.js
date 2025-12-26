@@ -29,6 +29,32 @@ try {
     console.error('Database pool error:', error.message);
 }
 
+// Add this after your middleware setup (around line 25)
+
+// JWT Authentication middleware
+const authenticateToken = (req, res, next) => {
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1];
+    
+    if (!token) {
+        return res.status(401).json({ 
+            success: false, 
+            message: 'Access token required' 
+        });
+    }
+    
+    jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key', (err, user) => {
+        if (err) {
+            return res.status(403).json({ 
+                success: false, 
+                message: 'Invalid or expired token' 
+            });
+        }
+        req.user = user;
+        next();
+    });
+};
+
 // Health endpoint - ALWAYS WORK
 app.get('/api/health', async (req, res) => {
     try {
@@ -129,11 +155,13 @@ app.post('/api/auth/login', async (req, res) => {
 });
 
 // Update profile endpoint
-app.put('/api/auth/update-profile', async (req, res) => {
-    console.log('📝 Update profile request received');
+// Update profile endpoint
+app.put('/api/auth/update-profile', authenticateToken, async (req, res) => {
+    console.log('📝 Update profile request received for user:', req.user.id);
     
     try {
-        const { name, userId } = req.body;
+        const { name } = req.body;
+        const userId = req.user.id; // Get from token, not from body
         
         console.log('Request data:', { name, userId });
         
@@ -143,61 +171,52 @@ app.put('/api/auth/update-profile', async (req, res) => {
                 message: 'Name is required'
             });
         }
-        
-        if (name.length > 100) {
-            return res.status(400).json({
-                success: false,
-                message: 'Name must be 100 characters or less'
-            });
-        }
-        
-        // Simple verification
+
+        // Validate userId
         if (!userId) {
             return res.status(400).json({
                 success: false,
                 message: 'User ID is required'
             });
         }
-        
-        // Get database pool
-        const dbPool = getPool();
-        if (!dbPool) {
-            return res.status(503).json({
+
+        // Check if pool exists
+        if (!pool) {
+            return res.status(500).json({
                 success: false,
-                message: 'Database service temporarily unavailable'
+                message: 'Database connection not available'
             });
         }
+
+        // Update user in database
+        const query = 'UPDATE users SET name = $1 WHERE id = $2 RETURNING id, name, email, created_at';
+        const values = [name.trim(), userId];
         
-        // Update in database
-        const result = await dbPool.query(
-            `UPDATE users 
-             SET name = $1, updated_at = NOW()
-             WHERE id = $2 OR user_id = $2
-             RETURNING id, user_id, email, name, profile_picture, updated_at`,
-            [name.trim(), userId]
-        );
+        console.log('Executing query:', query, 'with values:', values);
         
-        if (result.rows.length === 0) {
-            console.log('User not found:', userId);
+        const result = await pool.query(query, values);
+        
+        if (result.rowCount === 0) {
             return res.status(404).json({
                 success: false,
                 message: 'User not found'
             });
         }
+
+        console.log('✅ Profile updated successfully:', result.rows[0]);
         
-        console.log('✅ Name updated successfully for user:', userId);
-        
-        res.status(200).json({
+        res.json({
             success: true,
             message: 'Profile updated successfully',
             user: result.rows[0]
         });
         
     } catch (error) {
-        console.error('❌ Update profile error:', error);
+        console.error('❌ Server error updating profile:', error);
         res.status(500).json({
             success: false,
-            message: 'Server error updating profile: ' + error.message
+            message: 'Error updating profile',
+            error: error.message
         });
     }
 });
