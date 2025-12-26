@@ -192,13 +192,16 @@
                     
                     console.log('Response data:', data);
                     
+                    // Inside handleSubmit() function, update the success handler:
                     if (response.ok && data.success) {
-                        // Store authentication data
+                        // Store authentication data with correct keys
                         if (data.token) {
-                            localStorage.setItem('user_token', data.token);
+                            localStorage.setItem('token', data.token);
+                            localStorage.setItem('user_token', data.token); // For compatibility
                         }
                         if (data.user) {
-                            localStorage.setItem('user_data', JSON.stringify(data.user));
+                            localStorage.setItem('user', JSON.stringify(data.user));
+                            localStorage.setItem('user_data', JSON.stringify(data.user)); // For compatibility
                         }
                         
                         // Store backend URL for future API calls
@@ -209,7 +212,8 @@
                         
                         // Redirect to dashboard
                         setTimeout(() => {
-                            window.location.href = '/dashboard.html';
+                            // Use absolute URL to avoid redirect issues
+                            window.location.href = 'https://3k214.dfi.fund/dashboard.html';
                         }, 1000);
                     } else {
                         this.error = data.message || 'Invalid email or password';
