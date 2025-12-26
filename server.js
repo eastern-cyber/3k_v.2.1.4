@@ -2,6 +2,7 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+const fs = require('fs');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { Pool } = require('pg');
@@ -29,7 +30,33 @@ try {
     console.error('Database pool error:', error.message);
 }
 
-// Add this after your middleware setup (around line 25)
+// Static file serving - UPDATE THESE LINES
+app.use(express.static('public')); // For public assets
+
+// Serve templates directory as root for HTML files
+app.use(express.static('templates'));
+
+// Optional: Serve specific HTML files from templates at root level
+app.get('/login.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'templates', 'login.html'));
+});
+
+app.get('/dashboard.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'templates', 'dashboard.html'));
+});
+
+// For any other .html files in templates
+app.get('/:page.html', (req, res) => {
+    const page = req.params.page;
+    const filePath = path.join(__dirname, 'templates', `${page}.html`);
+    
+    // Check if file exists
+    if (fs.existsSync(filePath)) {
+        res.sendFile(filePath);
+    } else {
+        res.status(404).send('Page not found');
+    }
+});
 
 // JWT Authentication middleware
 const authenticateToken = (req, res, next) => {
