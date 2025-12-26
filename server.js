@@ -30,31 +30,30 @@ try {
     console.error('Database pool error:', error.message);
 }
 
-// === FIXED STATIC FILE SERVING ===
-// 1. Serve public assets
+// Static file serving with directory structure preserved
+app.use('/templates', express.static(path.join(__dirname, 'templates')));
 app.use('/public', express.static(path.join(__dirname, 'public')));
 
-// 2. Serve CSS, JS, images directly from root for convenience
-app.use('/css', express.static(path.join(__dirname, 'public/css')));
-app.use('/js', express.static(path.join(__dirname, 'public/js')));
-app.use('/images', express.static(path.join(__dirname, 'public/images')));
+// Optional: Also serve root files if needed
+app.use(express.static(path.join(__dirname)));
 
-// === SPECIFIC HTML ROUTES (MUST COME BEFORE STATIC) ===
-// Serve HTML files without .html extension
-app.get('/login', (req, res) => {
-    res.sendFile(path.join(__dirname, 'templates/login.html'));
+app.get('/dashboard.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'templates', 'dashboard.html'));
 });
 
-app.get('/dashboard', (req, res) => {
-    // Check authentication here if needed
-    res.sendFile(path.join(__dirname, 'templates/dashboard.html'));
+// For any other .html files in templates
+app.get('/:page.html', (req, res) => {
+    const page = req.params.page;
+    const filePath = path.join(__dirname, 'templates', `${page}.html`);
+    
+    // Check if file exists
+    if (fs.existsSync(filePath)) {
+        res.sendFile(filePath);
+    } else {
+        res.status(404).send('Page not found');
+    }
 });
 
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'templates/index.html'));
-});
-
-// === API ROUTES ===
 // JWT Authentication middleware
 const authenticateToken = (req, res, next) => {
     const authHeader = req.headers['authorization'];
@@ -79,7 +78,7 @@ const authenticateToken = (req, res, next) => {
     });
 };
 
-// Health endpoint
+// Health endpoint - ALWAYS WORK
 app.get('/api/health', async (req, res) => {
     try {
         let dbStatus = 'unknown';
@@ -166,9 +165,7 @@ app.post('/api/auth/login', async (req, res) => {
             success: true,
             token,
             user: userData,
-            message: 'Login successful',
-            // Add redirect URL in response
-            redirect: '/dashboard'
+            message: 'Login successful'
         });
         
     } catch (error) {
@@ -189,7 +186,7 @@ app.put('/api/auth/update-profile', authenticateToken, async (req, res) => {
         const { name } = req.body;
         
         // Extract userId from token - your token has "userId" field
-        const userId = req.user.userId;
+        const userId = req.user.userId; // This should be 282 from your token
         
         console.log('Request data:', { 
             name, 
@@ -211,6 +208,7 @@ app.put('/api/auth/update-profile', authenticateToken, async (req, res) => {
             });
         }
 
+        // Check if pool exists
         if (!pool) {
             return res.status(500).json({
                 success: false,
@@ -218,6 +216,7 @@ app.put('/api/auth/update-profile', authenticateToken, async (req, res) => {
             });
         }
 
+        // Update user in database - using the numeric userId (282)
         const query = 'UPDATE users SET name = $1 WHERE id = $2 RETURNING id, name, email, created_at';
         const values = [name.trim(), userId];
         
@@ -250,14 +249,71 @@ app.put('/api/auth/update-profile', authenticateToken, async (req, res) => {
     }
 });
 
-// === STATIC FILE ROUTES (COMES AFTER SPECIFIC ROUTES) ===
-// Serve .html files directly from templates
-app.use(express.static(path.join(__dirname, 'templates'), {
-    index: false, // Don't auto-serve index.html
-    extensions: ['html'] // Only serve .html files
-}));
+// Get profile endpoint (optional but useful)
+app.get('/api/auth/profile', async (req, res) => {
+    try {
+        const { userId } = req.query;
+        
+        if (!userId) {
+            return res.status(400).json({
+                success: false,
+                message: 'User ID is required'
+            });
+        }
+        
+        const dbPool = getPool();
+        if (!dbPool) {
+            return res.status(503).json({
+                success: false,
+                message: 'Database service temporarily unavailable'
+            });
+        }
+        
+        const result = await dbPool.query(
+            `SELECT id, user_id, email, name, profile_picture, 
+                    wallet_address, nft_tier, created_at, updated_at
+             FROM users 
+             WHERE id = $1 OR user_id = $1`,
+            [userId]
+        );
+        
+        if (result.rows.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: 'User not found'
+            });
+        }
+        
+        res.json({
+            success: true,
+            user: result.rows[0]
+        });
+        
+    } catch (error) {
+        console.error('Get profile error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to fetch profile'
+        });
+    }
+});
 
-// === CATCH-ALL ROUTES (MUST BE LAST) ===
+// Static files - Serve from templates directory
+app.use(express.static(path.join(__dirname, 'templates')));
+
+// Serve specific HTML files
+app.get('/login', (req, res) => {
+    res.sendFile(path.join(__dirname, 'templates/login.html'));
+});
+
+app.get('/dashboard', (req, res) => {
+    res.sendFile(path.join(__dirname, 'templates/dashboard.html'));
+});
+
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'templates/index.html'));
+});
+
 // Catch-all for API routes - return 404
 app.use('/api/*', (req, res) => {
     res.status(404).json({
