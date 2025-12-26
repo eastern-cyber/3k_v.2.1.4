@@ -108,6 +108,35 @@ app.get('/api/health', async (req, res) => {
     }
 });
 
+// Add this after your other API routes
+app.get('/api/auth/health', async (req, res) => {
+    try {
+        let dbStatus = 'unknown';
+        if (pool) {
+            await pool.query('SELECT NOW()');
+            dbStatus = 'connected';
+        }
+        
+        res.json({
+            success: true,
+            service: 'KokKokKok API v2.1.4',
+            status: 'online',
+            timestamp: new Date().toISOString(),
+            database: dbStatus,
+            environment: process.env.NODE_ENV || 'development'
+        });
+    } catch (error) {
+        res.json({
+            success: true,
+            service: 'KokKokKok API v2.1.4',
+            status: 'online',
+            timestamp: new Date().toISOString(),
+            database: 'disconnected',
+            error: error.message
+        });
+    }
+});
+
 // Login endpoint
 app.post('/api/auth/login', async (req, res) => {
     try {

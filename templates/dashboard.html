@@ -345,69 +345,67 @@
     // Update the saveName function in dashboard.html:
     // In dashboard.html, update the saveName function:
     async function saveName() {
-        const newName = document.getElementById('newNameInput').value.trim();
-        const messageElement = document.getElementById('nameEditMessage');
-        const userData = JSON.parse(localStorage.getItem('user_data'));
+        const newName = document.getElementById('nameInput').value;
+        const userData = JSON.parse(localStorage.getItem('user'));
+        const token = localStorage.getItem('token');
         
         console.log('Saving name:', newName);
         console.log('User data:', userData);
+        console.log('Token:', token);
         
-        if (!newName) {
-            messageElement.innerHTML = '<span class="message-error">Name cannot be empty</span>';
+        if (!newName || newName.trim() === '') {
+            alert('Please enter a name');
             return;
         }
         
-        // Show loading
-        messageElement.innerHTML = '<span class="message-loading">Saving...</span>';
+        if (!token) {
+            alert('Please login again');
+            window.location.href = '/login';
+            return;
+        }
         
         try {
-            const backendUrl = localStorage.getItem('backend_url') || 'https://3k214.dfi.fund';
-            
-            console.log('Sending to backend:', { 
-                backendUrl: `${backendUrl}/api/auth/update-profile`,
-                name: newName,
-                userId: userData.user_id || userData.id
-            });
-            
-            // Send update request - IMPORTANT: Use userId from userData
-            const response = await fetch(`${backendUrl}/api/auth/update-profile`, {
+            const response = await fetch('/api/auth/update-profile', {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`  // Make sure this is correct
                 },
                 body: JSON.stringify({
-                    name: newName,
-                    userId: userData.user_id || userData.id  // Use user_id or id
+                    name: newName
+                    // DO NOT send userId - it comes from the token
                 })
             });
             
             console.log('Response status:', response.status);
             
+            if (response.status === 401) {
+                // Token expired or invalid
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                alert('Session expired. Please login again.');
+                window.location.href = '/login';
+                return;
+            }
+            
             const data = await response.json();
             console.log('Response data:', data);
             
-            if (response.ok && data.success) {
-                // Update localStorage
-                userData.name = newName;
-                localStorage.setItem('user_data', JSON.stringify(userData));
-                
-                // Update UI
-                document.getElementById('userName').textContent = newName;
-                
-                // Show success message
-                messageElement.innerHTML = '<span class="message-success">✅ Name updated successfully!</span>';
-                
-                // Hide form after 2 seconds
-                setTimeout(() => {
-                    cancelNameEdit();
-                }, 2000);
+            if (data.success) {
+                alert('Profile updated successfully!');
+                // Update local storage
+                if (userData) {
+                    userData.name = newName;
+                    localStorage.setItem('user', JSON.stringify(userData));
+                    updateUserDisplay(userData);
+                }
             } else {
-                messageElement.innerHTML = `<span class="message-error">❌ ${data.message || 'Update failed'}</span>`;
+                alert('Error: ' + (data.message || 'Failed to update profile'));
             }
             
         } catch (error) {
-            console.error('Update error:', error);
-            messageElement.innerHTML = '<span class="message-error">❌ Network error. Please try again.</span>';
+            console.error('Error updating profile:', error);
+            alert('Network error. Please try again.');
         }
     }
 
