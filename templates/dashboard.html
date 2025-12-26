@@ -343,23 +343,17 @@
     }
 
     // Update the saveName function in dashboard.html:
+    // In dashboard.html, update the saveName function:
     async function saveName() {
         const newName = document.getElementById('newNameInput').value.trim();
         const messageElement = document.getElementById('nameEditMessage');
-        const token = localStorage.getItem('user_token');
+        const userData = JSON.parse(localStorage.getItem('user_data'));
         
         console.log('Saving name:', newName);
+        console.log('User data:', userData);
         
         if (!newName) {
             messageElement.innerHTML = '<span class="message-error">Name cannot be empty</span>';
-            return;
-        }
-        
-        if (!token) {
-            messageElement.innerHTML = '<span class="message-error">Not authenticated. Please login again.</span>';
-            setTimeout(() => {
-                window.location.href = 'login.html';
-            }, 2000);
             return;
         }
         
@@ -367,26 +361,23 @@
         messageElement.innerHTML = '<span class="message-loading">Saving...</span>';
         
         try {
-            // Determine backend URL
-            const backendUrl = localStorage.getItem('backend_url') || 
-                            (window.location.hostname.includes('localhost') ? 
-                            'http://localhost:3001' : 
-                            'https://3k214.dfi.fund');
+            const backendUrl = localStorage.getItem('backend_url') || 'https://3k214.dfi.fund';
             
             console.log('Sending to backend:', { 
                 backendUrl: `${backendUrl}/api/auth/update-profile`,
-                token: token ? 'Present' : 'Missing'
+                name: newName,
+                userId: userData.user_id || userData.id
             });
             
-            // Send update request with JWT token
+            // Send update request - IMPORTANT: Use userId from userData
             const response = await fetch(`${backendUrl}/api/auth/update-profile`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
                 },
                 body: JSON.stringify({
-                    name: newName
+                    name: newName,
+                    userId: userData.user_id || userData.id  // Use user_id or id
                 })
             });
             
@@ -397,7 +388,6 @@
             
             if (response.ok && data.success) {
                 // Update localStorage
-                const userData = JSON.parse(localStorage.getItem('user_data'));
                 userData.name = newName;
                 localStorage.setItem('user_data', JSON.stringify(userData));
                 
@@ -413,12 +403,6 @@
                 }, 2000);
             } else {
                 messageElement.innerHTML = `<span class="message-error">❌ ${data.message || 'Update failed'}</span>`;
-                // If token is invalid, redirect to login
-                if (response.status === 401 || response.status === 403) {
-                    setTimeout(() => {
-                        window.location.href = 'login.html';
-                    }, 2000);
-                }
             }
             
         } catch (error) {
