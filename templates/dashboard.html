@@ -171,6 +171,7 @@
                 </div>
                 
                 <p><strong>User ID:</strong> <span id="userId" class="wallet-address">Loading...</span></p>
+                <p><strong>User ID:</strong> <span id="tokenId">Loading...</span></p>
                 <p><strong>Status:</strong> <span style="color: green;">✅ Authenticated</span></p>
             </div>
         </div>
@@ -233,7 +234,8 @@
                 document.getElementById('userEmail').textContent = user.email || 'Not set';
                 document.getElementById('userName').textContent = user.name || 'Not set';
                 document.getElementById('userId').textContent = user.user_id || 'Not set';
-                
+                document.getElementById('tokenId').textContent = user.token_id || 'Not set';
+
                 console.log('User loaded:', user);
             } catch (e) {
                 console.error('Error parsing user data:', e);
