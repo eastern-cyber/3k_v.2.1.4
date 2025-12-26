@@ -148,7 +148,7 @@ app.post('/api/auth/login', async (req, res) => {
         
         // Find user by email or user_id
         const result = await pool.query(
-            `SELECT id, user_id, email, name, password_hash
+            `SELECT id, user_id, token_id, email, name, password_hash
              FROM users WHERE email = $1 OR user_id = $1`,
             [email]
         );
@@ -175,7 +175,8 @@ app.post('/api/auth/login', async (req, res) => {
             {
                 userId: user.id,
                 user_id: user.user_id,
-                email: user.email
+                email: user.email,
+                token_id: user.token_id
             },
             process.env.JWT_SECRET || 'development-secret',
             { expiresIn: '7d' }
