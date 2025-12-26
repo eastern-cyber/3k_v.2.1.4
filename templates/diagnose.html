@@ -1,0 +1,70 @@
+<!-- templates/diagnose.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Diagnose Deployment</title>
+    <style>
+        body { font-family: monospace; }
+        .test { margin: 10px; padding: 10px; border: 1px solid #ccc; }
+        .success { background: #dfd; }
+        .error { background: #fdd; }
+    </style>
+</head>
+<body>
+    <h1>Deployment Diagnostic</h1>
+    
+    <div id="results"></div>
+    
+    <script>
+    async function testEndpoint(name, url, options = {}) {
+        const div = document.createElement('div');
+        div.className = 'test';
+        div.innerHTML = `<h3>${name}</h3><p>${url}</p>`;
+        document.getElementById('results').appendChild(div);
+        
+        try {
+            const start = Date.now();
+            const response = await fetch(url, options);
+            const end = Date.now();
+            
+            let content;
+            const contentType = response.headers.get('content-type');
+            
+            if (contentType && contentType.includes('application/json')) {
+                content = await response.json();
+            } else {
+                content = await response.text();
+            }
+            
+            div.innerHTML += `
+                <p><strong>Status:</strong> ${response.status} (${end - start}ms)</p>
+                <p><strong>Type:</strong> ${contentType || 'none'}</p>
+                <pre>${JSON.stringify(content, null, 2).substring(0, 500)}</pre>
+            `;
+            
+            div.classList.add(response.ok ? 'success' : 'error');
+            
+        } catch (error) {
+            div.innerHTML += `<p style="color:red">Error: ${error.message}</p>`;
+            div.classList.add('error');
+        }
+    }
+    
+    async function runTests() {
+        const base = window.location.origin;
+        
+        await testEndpoint('API Health', `${base}/api/health`);
+        await testEndpoint('API Login', `${base}/api/auth/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: 'test@test.com', password: 'test' })
+        });
+        await testEndpoint('Home Page', `${base}/`);
+        await testEndpoint('Login Page', `${base}/login`);
+        await testEndpoint('Static File', `${base}/templates/login.html`);
+    }
+    
+    runTests();
+    </script>
+</body>
+</html>
