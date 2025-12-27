@@ -40,17 +40,17 @@
 
         <main>
             <div class="max-w-[360px] mx-auto pt-16">
-                <h1 class="text-center pb-4">Login</h1>
+                <h1 class="text-center pb-4">ล็อกอิน</h1>
                 <div class="mb-10">
                     <!-- FIXED FORM WITH PROPER ALPINE.JS -->
                     <div x-data="loginForm()" x-init="init()">
                         <form @submit.prevent="handleSubmit">
-                            <p class="font-medium text-sm mb-1">Email or Username</p>
+                            <p class="font-medium text-sm mb-1">อีเมล</p>
                             <div class="flex flex-col gap-2 mb-2">
                                 <!-- Email input -->
                                 <input x-model="email" 
                                        type="text" 
-                                       placeholder="Email or Username" 
+                                       placeholder="อีเมล" 
                                        class="input-field" 
                                        :disabled="loading"
                                        required>
@@ -59,7 +59,7 @@
                                 <div class="grid relative w-full">
                                     <input x-model="password" 
                                            :type="passwordVisible ? 'text' : 'password'" 
-                                           placeholder="Password" 
+                                           placeholder="รหัสผ่าน" 
                                            class="input-field" 
                                            :disabled="loading"
                                            required>
@@ -84,7 +84,7 @@
                             </div>
                             
                             <a href="/forgot-password" class="inline-block align-top text-xs font-medium text-neutral-500 hover:underline hover:text-black mb-6">
-                                Forgot password?
+                                ลืมรหัสผ่าน?
                             </a>
                             
                             <button type="submit" 
@@ -104,7 +104,7 @@
                 <div class="p-0 flex justify-center font-bold">
                     <p class="p-4 rounded-sm bg-neutral-200 mb-6 hover:bg-red-500">
                         <a href="/templates/home.html" class="font-medium hover:bg-red-500 text-neutral-600 hover:text-neutral-100">
-                            App Prototype
+                            ต้นแบบแอ๊พ
                         </a>
                     </p>
                 </div>
@@ -116,7 +116,7 @@
                                 <path d="M4.58579 22.5858L20.8787 6.29289C21.2692 5.90237 21.9024 5.90237 22.2929 6.29289L23.7071 7.70711C24.0976 8.09763 24.0976 8.7308 23.7071 9.12132L8.82843 24L23.7071 38.8787C24.0976 39.2692 24.0976 39.9024 23.7071 40.2929L22.2929 41.7071C21.9024 42.0976 21.2692 42.0976 20.8787 41.7071L4.58579 25.4142C3.80474 24.6332 3.80474 23.3668 4.58579 22.5858Z"></path>
                             </svg>
                         </div>
-                        <p class="font-medium">Back to Home</p>
+                        <p class="font-medium">กลับหน้าหลัก</p>
                     </a>
                 </div>
             </div>
@@ -124,7 +124,7 @@
 
         <footer>
             <div class="text-center p-5 border-t border-neutral-300">
-                <p>No account yet? <a href="/signup.html" class="text-rose-500 font-medium hover:underline">Register</a></p>
+                <p>ยังไม่ได้เป็นสมาชิก? <a href="/signup.html" class="text-rose-500 font-medium hover:underline">ลงทะเบียน</a></p>
             </div>
             <div class="bg-black text-neutral-400 h-21 flex items-center justify-end px-36 text-sm">
                 <p>© 2025 KokKokKok</p>
