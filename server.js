@@ -58,7 +58,7 @@ const authenticateToken = (req, res, next) => {
 app.use('/public', express.static(path.join(__dirname, 'public')));
 app.use('/css', express.static(path.join(__dirname, 'public/css')));
 app.use('/js', express.static(path.join(__dirname, 'public/js')));
-app.use('/images', express.static(path.join(__dirname, 'public/images')));
+app.use('/static/images', express.static(path.join(__dirname, 'public/images')));
 
 // Serve HTML files from templates directory
 app.use(express.static(path.join(__dirname, 'templates')));
